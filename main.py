@@ -1,16 +1,30 @@
-# This is a sample Python script.
+from sympy import solve, symbols, pi, Eq
+from sympy.physics.units.systems import SI
+from sympy.physics.units import Quantity, length, mass
+from sympy.physics.units import kilometer, meter, kilogram
+from sympy.physics.units.util import quantity_simplify
+from sympy.physics.units import convert_to
 
-# Press Umschalt+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from sympy.physics.units import UnitSystem
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Strg+F8 to toggle the breakpoint.
+def test() -> None:
+    x = symbols("x")
+    l = Quantity("l")
+    SI.set_quantity_dimension(l, length)
+    SI.set_quantity_scale_factor(l, 2 * kilometer)
+    r = Quantity("r")
+    SI.set_quantity_dimension(r, length)
+    SI.set_quantity_scale_factor(r, 4 * meter)
+
+    eq = Eq(x, 2 * l / (r ** 2))
+
+    q = solve(eq, x)
+    print(q[0])
+    print(convert_to(q[0], [1 / meter]))
+
+    print(convert_to(q[0], SI._base_units))
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    test()
