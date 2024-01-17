@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
-from bardow.model import units
+from sympy.physics import units
 
 
 @dataclass
@@ -24,11 +24,6 @@ class Known(Variable):
     def formula_representation(self) -> str:
         return self.representation_format.format(value=self.value,
                                                  var_unit=self.var_unit)
-
-    def convert_to(self, unit: units.Unit) -> None:
-        factor = self.var_unit.convert_to(unit)
-        self.value *= factor
-        self.var_unit = unit
 
 
 @dataclass
