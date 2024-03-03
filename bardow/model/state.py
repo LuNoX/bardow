@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from bardow.model import variable
 
@@ -12,4 +13,4 @@ class State:
     enthalpy: variable.Variable
     entropy: variable.Variable
 
-    name: str = ""
+    name: Optional[str] = None
