@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, overrides
 
 import sympy
 from sympy.physics import units
@@ -13,8 +13,13 @@ class Variable(ABC):
 
     @property
     @abstractmethod
+    def is_known(self) -> bool:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
     def formula_representation(self) -> str:
-        return self.name
+        raise NotImplementedError
 
 
 @dataclass
@@ -35,6 +40,11 @@ class Known(Variable):
         self.__sympy_quantity = quantity
         return quantity
 
+    @overrides
+    def is_known(self) -> bool:
+        return True
+
+    @overrides
     def formula_representation(self) -> str:
         return str(self.__sympy_quantity.convert_to(systems.SI._base_units))
 
@@ -52,5 +62,19 @@ class Unknown(Variable):
         self.__sympy_symbol = symbol
         return symbol
 
+    @overrides
+    def is_known(self) -> bool:
+        return False
+
+    @overrides
     def formula_representation(self) -> str:
         return self.symbol
+
+    def create_known(self, value: float, unit: units.Unit) -> Known:
+        known = Known(
+            name=self.name,
+            unit=unit,
+            value=value,
+            symbol=self.symbol
+        )
+        return known
