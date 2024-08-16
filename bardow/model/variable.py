@@ -7,10 +7,10 @@ from sympy.physics import units
 from sympy.physics.units import systems, dimensions
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Variable(ABC):
     name: str
-    dimension: Optional[dimensions.Dimension]
+    dimension: Optional[dimensions.Dimension] = None
 
     @property
     @abstractmethod
