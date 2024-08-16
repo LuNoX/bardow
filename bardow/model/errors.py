@@ -4,3 +4,7 @@ class CannotConvertError(Exception):
 
 class NotSolvableError(Exception):
     pass
+
+
+class TooFewKnownsError(Exception):
+    pass

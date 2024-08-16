@@ -4,12 +4,13 @@ from typing import Optional, override
 
 import sympy
 from sympy.physics import units
-from sympy.physics.units import systems
+from sympy.physics.units import systems, dimensions
 
 
 @dataclass
 class Variable(ABC):
     name: str
+    dimension: Optional[dimensions.Dimension]
 
     @property
     @abstractmethod
