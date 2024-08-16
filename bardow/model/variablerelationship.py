@@ -38,9 +38,6 @@ class Equation(VariableRelationship):
         if len(unknowns) != 1:
             # If there are 0 unknowns, there is nothing to solve
             # If there is more than one unknown, the equation is not solvable.
-
-            # TODO: linear systems of equations may be solvable by combining
-            #  multiple equations with more than one unknown each
             raise errors.NotSolvableError()
         solutions = sympy.solve(self.__sympy_equation, unknowns)
         knowns = set()
