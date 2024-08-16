@@ -6,7 +6,7 @@ import sympy
 from sympy.physics import units
 from sympy.physics.units.systems import SI
 
-from bardow.model import variable
+from bardow.model import variable, errors, table as table_
 
 
 @dataclass
@@ -14,7 +14,7 @@ class VariableRelationship(ABC):
     variables: Set[variable.Variable]
 
     @abstractmethod
-    def relate(self) -> Set[variable.Variable]:
+    def relate(self) -> Set[variable.Known]:
         raise NotImplementedError
 
 
@@ -33,7 +33,7 @@ class Equation(VariableRelationship):
         return equation
 
     @override
-    def relate(self) -> Set[variable.Variable]:
+    def relate(self) -> Set[variable.Known]:
         unknowns = {var for var in self.variables if not var.is_known}
         if len(unknowns) != 1:
             # If there are 0 unknowns, there is nothing to solve
@@ -41,7 +41,7 @@ class Equation(VariableRelationship):
 
             # TODO: linear systems of equations may be solvable by combining
             #  multiple equations with more than one unknown each
-            return set()
+            raise errors.NotSolvableError()
         solutions = sympy.solve(self.__sympy_equation, unknowns)
         knowns = set()
         for unknown, solution in zip(unknowns, solutions.values):
@@ -55,9 +55,14 @@ class Equation(VariableRelationship):
 
 @dataclass
 class Function(Equation):
-    pass
+    left_hand_side = variable.Variable
 
 
 @dataclass
 class ValueTable(VariableRelationship):
-    pass
+    table: table_.Table
+
+    @override
+    def relate(self) -> Set[variable.Known]:
+        knowns = {var for var in self.variables if var.is_known}
+        return self.table.lookup(knowns, only_return=self.variables - knowns)
