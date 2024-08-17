@@ -1,10 +1,10 @@
-import unittest
+import pytest
 
 
-class MyTestCase(unittest.TestCase):
-    def test_something(self):
-        self.assertEqual(True, False)  # add assertion here
+class TestState:
+    # TODO: once fundamental quantities are done, test state here
+    pass
 
 
 if __name__ == '__main__':
-    unittest.main()
+    pytest.main()
