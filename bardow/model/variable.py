@@ -16,7 +16,6 @@ class Variable(ABC):
     def is_known(self) -> bool:
         return isinstance(self, Known)
 
-    @property
     @abstractmethod
     def formula_representation(self) -> str:
         raise NotImplementedError
