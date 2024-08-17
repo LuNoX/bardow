@@ -7,3 +7,5 @@ Repo todos:
 - [ ] use github action for black
 - [ ] use github action for code coverage
 - [ ] use github action for sonarlint
+- [ ] set up version testing with anaconda
+- [ ] set up a package deployment
