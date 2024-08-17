@@ -13,9 +13,8 @@ class Variable(ABC):
     dimension: Optional[dimensions.Dimension] = None
 
     @property
-    @abstractmethod
     def is_known(self) -> bool:
-        raise NotImplementedError
+        return isinstance(self, Known)
 
     @property
     @abstractmethod
@@ -31,6 +30,9 @@ class Known(Variable):
 
     __sympy_quantity: units.Quantity = None
 
+    def __post_init__(self) -> None:
+        self.dimension = self.unit.dimension
+
     @property
     def _sympy_quantity(self) -> units.Quantity:
         if self.__sympy_quantity is not None:
@@ -42,11 +44,8 @@ class Known(Variable):
         return quantity
 
     @override
-    def is_known(self) -> bool:
-        return True
-
-    @override
     def formula_representation(self) -> str:
+        # TODO: use symbols for units instead of full name?
         return str(self.__sympy_quantity.convert_to(systems.SI._base_units))
 
 
@@ -62,10 +61,6 @@ class Unknown(Variable):
         symbol = sympy.Symbol(self.symbol)
         self.__sympy_symbol = symbol
         return symbol
-
-    @override
-    def is_known(self) -> bool:
-        return False
 
     @override
     def formula_representation(self) -> str:
