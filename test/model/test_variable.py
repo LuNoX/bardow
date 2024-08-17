@@ -8,19 +8,31 @@ from bardow.model import variable
 
 
 class TestVariable:
+    initial_name = "test"
 
     @staticmethod
     def test_instantiation() -> None:
         with pytest.raises(TypeError):
             variable.Variable(name="test")
 
-    @staticmethod
-    def test_fields() -> None:
-        name = "test"
+    @pytest.fixture(scope="class")
+    def instance(self) -> variable.Variable:
         variable.Variable.__abstractmethods__ = set()
-        instance = variable.Variable(name=name)
-        assert instance.name == name
+        instance = variable.Variable(name=self.initial_name)
+        return instance
+
+    def test_fields(self, instance: variable.Variable) -> None:
+        assert instance.name == self.initial_name
         assert instance.dimension is None
+
+    @staticmethod
+    def test_is_known(instance: variable.Variable) -> None:
+        assert instance.is_known is False
+
+    @staticmethod
+    def test_formula_representation(instance: variable.Variable) -> None:
+        with pytest.raises(NotImplementedError):
+            instance.formula_representation()
 
 
 class TestKnown:
