@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Type, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import sympy
 from sympy.physics import units
@@ -33,6 +33,9 @@ class SympyKnown(variable_backend.KnownBackend):
             systems.SI._base_units))
 
 
+SYMPY_KNOWN = SympyKnown()
+
+
 @dataclass
 class SympyUnknownRepresentation(variable_backend.UnknownBackendRepresentation
                                  ):
@@ -41,8 +44,8 @@ class SympyUnknownRepresentation(variable_backend.UnknownBackendRepresentation
 
 class SympyUnknown(variable_backend.UnknownBackend):
     @property
-    def known_backend(self) -> Type[SympyKnown]:
-        return SympyKnown
+    def known_backend(self) -> SympyKnown:
+        return SYMPY_KNOWN
 
     def create_backend_representation(
             self, unknown: variable.Unknown
@@ -55,6 +58,8 @@ class SympyUnknown(variable_backend.UnknownBackend):
         return backend_representation.symbol.name
 
 
+SYMPY_UNKNOWN = SympyUnknown()
+
 SYMPY_BACKEND = backend.PartialBackend(
-    known=SympyKnown(),
-    unknown=SympyUnknown())
+    known=SYMPY_KNOWN,
+    unknown=SYMPY_UNKNOWN)

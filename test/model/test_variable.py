@@ -1,24 +1,26 @@
 from copy import copy
 
 import pytest
-import sympy
-from sympy.physics.units import kelvin, quantities, meter
+from sympy.physics.units import kelvin
 
 from bardow.model import variable
+from bardow.backend.implementations import stub
+from bardow.backend import variable as variable_backend
 
 
 class TestVariable:
     initial_name = "test"
 
-    @staticmethod
-    def test_instantiation() -> None:
+    def test_instantiation(self) -> None:
         with pytest.raises(TypeError):
-            variable.Variable(name="test")
+            variable.Variable(name=self.initial_name,
+                              _backend=stub.StubVariable())
 
     @pytest.fixture(scope="class")
     def instance(self) -> variable.Variable:
         variable.Variable.__abstractmethods__ = set()
-        instance = variable.Variable(name=self.initial_name)
+        instance = variable.Variable(name=self.initial_name,
+                                     _backend=stub.StubVariable())
         return instance
 
     def test_fields(self, instance: variable.Variable) -> None:
@@ -27,12 +29,13 @@ class TestVariable:
 
     @staticmethod
     def test_is_known(instance: variable.Variable) -> None:
-        assert instance.is_known is False
+        with pytest.raises(NotImplementedError):
+            _ = instance.is_known
 
     @staticmethod
     def test_formula_representation(instance: variable.Variable) -> None:
         with pytest.raises(NotImplementedError):
-            instance.formula_representation()
+            _ = instance.formula_representation
 
 
 class TestKnown:
@@ -69,28 +72,27 @@ class TestKnown:
     def test_is_known(instance: variable.Known) -> None:
         assert instance.is_known is True
 
-    def test_sympy_quantity(self, instance: variable.Known) -> None:
-        quantity = instance._sympy_quantity
-        assert isinstance(quantity, quantities.Quantity)
-        assert quantity.dimension == self.initial_unit.dimension
+    @staticmethod
+    def test_backend_representation(instance: variable.Known) -> None:
+        assert isinstance(instance._backend_representation,
+                          variable_backend.KnownBackendRepresentation)
 
     def test_formula_representation(self, instance: variable.Known) -> None:
-        assert isinstance(instance.formula_representation(), str)
-        assert (instance.formula_representation()
+        assert isinstance(instance.formula_representation, str)
+        assert (instance.formula_representation
                 == self.expected_representation)
 
 
 class TestUnknown:
     initial_name = "test"
     initial_symbol = "T"
-    initial_dimension = kelvin.dimension
 
     @pytest.fixture(scope="class")
     def instance(self) -> variable.Unknown:
         instance = variable.Unknown(
             name=self.initial_name,
             symbol=self.initial_symbol,
-            dimension=copy(self.initial_dimension)
+            dimension=copy(kelvin.dimension)
         )
         return instance
 
@@ -103,11 +105,16 @@ class TestUnknown:
         assert instance.is_known is False
 
     def test_formula_representation(self, instance: variable.Unknown) -> None:
-        assert instance.formula_representation() == self.initial_symbol
+        assert instance.formula_representation == self.initial_symbol
 
     @staticmethod
-    def test_sympy_symbol(instance: variable.Unknown) -> None:
-        assert isinstance(instance._sympy_symbol, sympy.Symbol)
+    def test_backend(instance: variable.Unknown) -> None:
+        assert isinstance(instance._backend, variable_backend.UnknownBackend)
+
+    @staticmethod
+    def test_backend_representation(instance: variable.Unknown) -> None:
+        assert isinstance(instance._backend_representation,
+                          variable_backend.UnknownBackendRepresentation)
 
     def test_create_known(self, instance: variable.Unknown) -> None:
         unit = kelvin

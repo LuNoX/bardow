@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import override, Type, TYPE_CHECKING
+from typing import override, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bardow.model import variable
@@ -44,7 +44,7 @@ class UnknownBackendRepresentation(VariableBackendRepresentation, ABC):
 class UnknownBackend(VariableBackend, ABC):
     @property
     @abstractmethod
-    def known_backend(self) -> KnownBackend | Type[KnownBackend]:
+    def known_backend(self) -> KnownBackend:
         raise NotImplementedError()
 
     @override

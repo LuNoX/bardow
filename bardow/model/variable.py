@@ -2,74 +2,72 @@ from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from typing import Optional, override
 
-import sympy
 from sympy.physics import units
-from sympy.physics.units import systems, dimensions
+from sympy.physics.units import dimensions
+
+from bardow.backend import variable
+from bardow.backend.default import DEFAULT_BACKEND
 
 
 @dataclass(kw_only=True)
 class Variable(ABC):
     name: str
+    _backend: variable.VariableBackend
     dimension: Optional[dimensions.Dimension] = None
+    _backend_representation: Optional[
+        variable.VariableBackendRepresentation] = None
+
+    def __post_init__(self) -> None:
+        # TODO: consider doing this just in time when accessed instead of
+        #  always
+        self._backend_representation = self._backend. \
+            create_backend_representation(self)
 
     @property
-    def is_known(self) -> bool:
-        return isinstance(self, Known)
-
     @abstractmethod
+    def is_known(self) -> bool:
+        raise NotImplementedError()
+
+    @property
     def formula_representation(self) -> str:
-        raise NotImplementedError
+        return self._backend.formula_representation(
+            self._backend_representation)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Known(Variable):
     unit: units.Unit
     value: float
+    _backend: Optional[variable.KnownBackend] = DEFAULT_BACKEND.known
     symbol: Optional[str] = None
 
-    __sympy_quantity: units.Quantity = None
-
+    @override
     def __post_init__(self) -> None:
+        super().__post_init__()
         self.dimension = self.unit.dimension
 
     @property
-    def _sympy_quantity(self) -> units.Quantity:
-        if self.__sympy_quantity is not None:
-            return self.__sympy_quantity
-        quantity = units.Quantity(self.name)
-        systems.SI.set_quantity_dimension(quantity, self.unit.dimension)
-        systems.SI.set_quantity_scale_factor(quantity, self.value * self.unit)
-        self.__sympy_quantity = quantity
-        return quantity
-
     @override
-    def formula_representation(self) -> str:
-        # TODO: use symbols for units instead of full name?
-        return str(self.__sympy_quantity.convert_to(systems.SI._base_units))
+    def is_known(self) -> bool:
+        return isinstance(self, Known)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Unknown(Variable):
     symbol: str
-    __sympy_symbol: sympy.Symbol = None
+    _backend: Optional[variable.UnknownBackend] = DEFAULT_BACKEND.unknown
 
     @property
-    def _sympy_symbol(self) -> sympy.Symbol:
-        if self.__sympy_symbol is not None:
-            return self.__sympy_symbol
-        symbol = sympy.Symbol(self.symbol)
-        self.__sympy_symbol = symbol
-        return symbol
-
     @override
-    def formula_representation(self) -> str:
-        return self.symbol
+    def is_known(self) -> bool:
+        return isinstance(self, Known)
 
     def create_known(self, value: float, unit: units.Unit) -> Known:
         known = Known(
             name=self.name,
             unit=unit,
             value=value,
-            symbol=self.symbol
+            symbol=self.symbol,
+            _backend=self._backend.known_backend
         )
         return known
