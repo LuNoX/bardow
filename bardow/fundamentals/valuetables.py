@@ -30,11 +30,12 @@ class CoolPropWaterProperties(variablerelationship.ValueTable):
     @staticmethod
     def find_optimal_lookup_inputs(knowns: Set[variable.Known]
                                    ) -> Tuple[variable.Known, variable.Known]:
-        if l := len(knowns) < 2:
+        if num_knowns := len(knowns) < 2:
             raise errors.TooFewKnownsError(
-                f"Expected at least 2 known variables, got {l}: {knowns}")
-        # CoolProp is fastest with T, rho as input, slower with T, p and
-        # significantly slower in every other case
+                f"Expected at least 2 known variables, got {num_knowns}!"
+                f"Knowns: {knowns}")
+        # CoolProp is fastest with (T, rho) as input, slower with (T, p) and
+        # significantly slower in other cases
         T = rho = rho_molar = p = False
         for known in knowns:
             print(known.dimension)
