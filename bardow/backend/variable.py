@@ -2,16 +2,19 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import override, TYPE_CHECKING
 
+from bardow.backend import backend
+
 if TYPE_CHECKING:
     from bardow.model import variable
 
 
-class VariableBackendRepresentation(ABC):
+class VariableBackendRepresentation(backend.BackendRepresentation, ABC):
     pass
 
 
-class VariableBackend(ABC):
+class VariableBackend(backend.BackendImplementation, ABC):
 
+    @override
     @abstractmethod
     def create_backend_representation(self, var: variable.Variable
                                       ) -> VariableBackendRepresentation:

@@ -1,14 +1,15 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from bardow.backend import variable, backend
+from bardow.backend import variable
 
 if TYPE_CHECKING:
     from bardow.model import variable as variable_model
 
 
 class StubVariableRepresentation(variable.VariableBackendRepresentation):
-    pass
+    def value(self) -> Any:
+        return self
 
 
 class StubVariable(variable.VariableBackend):

@@ -1,53 +1,33 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from typing import Set, Any, override
+from typing import Set, Any, override, Optional
 
-import sympy
-from sympy.physics import units
-from sympy.physics.units.systems import SI
+from bardow.model import variable, table as table_
+from bardow.backend import equation
+from bardow.backend.default import DEFAULT_BACKEND
+from bardow.backend.backend import HasBackend
 
-from bardow.model import variable, errors, table as table_
 
-
-@dataclass
+@dataclass(kw_only=True)
 class VariableRelationship(ABC):
     variables: Set[variable.Variable]
 
     @abstractmethod
     def relate(self) -> Set[variable.Known]:
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
-@dataclass
-class Equation(VariableRelationship):
+@dataclass(kw_only=True)
+class Equation(VariableRelationship, HasBackend):
     left_hand_side: Any
     right_hand_side: Any
-    __sympy_equation: sympy.Eq = None
-
-    @property
-    def _sympy_equation(self) -> sympy.Eq:
-        if self.__sympy_equation is not None:
-            return self.__sympy_equation
-        equation = sympy.Eq(self.left_hand_side, self.right_hand_side)
-        self.__sympy_equation = equation
-        return equation
+    _backend: equation.EquationBackend = DEFAULT_BACKEND.equation
+    _backend_representation: Optional[
+        equation.EquationBackendRepresentation] = None
 
     @override
     def relate(self) -> Set[variable.Known]:
-        unknowns = {var for var in self.variables if not var.is_known}
-        if len(unknowns) != 1:
-            # If there are 0 unknowns, there is nothing to solve
-            # If there is more than one unknown, the equation is not solvable.
-            raise errors.NotSolvableError()
-        solutions = sympy.solve(self.__sympy_equation, unknowns)
-        knowns = set()
-        for unknown, solution in zip(unknowns, solutions.values):
-            value, unit = units.convert_to(solution, SI._base_units)
-            known = unknown.create_known(value, unit)
-            knowns.add(known)
-            self.variables.remove(unknown)
-            self.variables.add(known)
-        return knowns
+        return self._backend_representation.solve(self.variables)
 
 
 @dataclass

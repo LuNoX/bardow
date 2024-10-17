@@ -7,21 +7,13 @@ from sympy.physics.units import dimensions
 
 from bardow.backend import variable
 from bardow.backend.default import DEFAULT_BACKEND
+from bardow.backend.backend import backend, HasBackend
 
 
 @dataclass(kw_only=True)
-class Variable(ABC):
+class Variable(HasBackend, ABC):
     name: str
-    _backend: variable.VariableBackend
     dimension: Optional[dimensions.Dimension] = None
-    _backend_representation: Optional[
-        variable.VariableBackendRepresentation] = None
-
-    def __post_init__(self) -> None:
-        # TODO: consider doing this just in time when accessed instead of
-        #  always
-        self._backend_representation = self._backend. \
-            create_backend_representation(self)
 
     @property
     @abstractmethod
@@ -35,15 +27,15 @@ class Variable(ABC):
 
 
 @dataclass(kw_only=True)
+@backend(DEFAULT_BACKEND.known)
 class Known(Variable):
     unit: units.Unit
     value: float
-    _backend: Optional[variable.KnownBackend] = DEFAULT_BACKEND.known
     symbol: Optional[str] = None
 
-    @override
     def __post_init__(self) -> None:
-        super().__post_init__()
+        if self.dimension is not None:
+            return
         self.dimension = self.unit.dimension
 
     @property
@@ -53,9 +45,9 @@ class Known(Variable):
 
 
 @dataclass(kw_only=True)
+@backend(DEFAULT_BACKEND.unknown)
 class Unknown(Variable):
     symbol: str
-    _backend: Optional[variable.UnknownBackend] = DEFAULT_BACKEND.unknown
 
     @property
     @override
