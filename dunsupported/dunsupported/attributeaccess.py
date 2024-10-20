@@ -33,6 +33,8 @@ class UnsupportedAttributeAccess(UnsupportedOperation):
             message: str = None,
             error_type: Type[Exception] | Callable[[str], Exception] = None
     ) -> Callable[[Type[T]], Type[T]]:
+        # TODO: warn that other dunsupported decorators use this method,
+        #  always apply last
         def decorator(cls: Type[T]) -> Type[T]:
             return UnsupportedAttributeAccess.unary_operation_not_supported(
                 "setattr", "obj.x = y", message, error_type
@@ -73,17 +75,13 @@ class UnsupportedAttributeAccess(UnsupportedOperation):
             cls = UnsupportedAttributeAccess. \
                 getting_missing_attribute_not_supported(
                 message, error_type)(cls)
-
             cls = UnsupportedAttributeAccess.getting_attribute_not_supported(
                 message, error_type)(cls)
-
-            cls = UnsupportedAttributeAccess.setting_attribute_not_supported(
-                message, error_type)(cls)
-
             cls = UnsupportedAttributeAccess.deleting_attribute_not_supported(
                 message, error_type)(cls)
-
             cls = UnsupportedAttributeAccess.attributes_as_list_not_supported(
+                message, error_type)(cls)
+            cls = UnsupportedAttributeAccess.setting_attribute_not_supported(
                 message, error_type)(cls)
 
             return cls
