@@ -13,7 +13,7 @@ class SystemOfRelationships:
         if self.variables:
             return
         for relationship in self.relationships:
-            self.variables += relationship.variables
+            self.variables.update(relationship.variables)
 
     def solve(self) -> Set[variable.Known]:
         # TODO: implement
