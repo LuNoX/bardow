@@ -5,7 +5,6 @@ from typing import Optional, override
 from sympy.physics import units
 from sympy.physics.units import dimensions
 
-from bardow.backend import variable
 from bardow.backend.default import DEFAULT_BACKEND
 from bardow.backend.backend import backend, HasBackend
 
