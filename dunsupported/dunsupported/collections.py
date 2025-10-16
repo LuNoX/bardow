@@ -132,25 +132,24 @@ class UnsupportedCollections(UnsupportedOperation):
         def decorator(cls: Type[T]) -> Type[T]:
             cls = UnsupportedCollections.length_not_supported(
                 message, error_type)(cls)
+            cls = UnsupportedCollections.iteration_not_supported(
+                message, error_type)(cls)
+            cls = UnsupportedCollections.getting_item_not_supported(
+                message, error_type)(cls)
+            cls = UnsupportedCollections.setting_item_not_supported(
+                message, error_type)(cls)
+            cls = UnsupportedCollections.deleting_item_not_supported(
+                message, error_type)(cls)
+            cls = UnsupportedCollections.contains_not_supported(
+                message, error_type)(cls)
+            cls = UnsupportedCollections.reversing_not_supported(
+                message, error_type)(cls)
+            cls = UnsupportedCollections.next_item_not_supported(
+                message, error_type)(cls)
+            cls = UnsupportedCollections.missing_item_not_supported(
+                message, error_type)(cls)
+            cls = UnsupportedCollections.length_hinting_not_supported(
+                message, error_type)(cls)
+            return cls
 
-        cls = UnsupportedCollections.iteration_not_supported(
-            message, error_type)(cls)
-        cls = UnsupportedCollections.getting_item_not_supported(
-            message, error_type)(cls)
-        cls = UnsupportedCollections.setting_item_not_supported(
-            message, error_type)(cls)
-        cls = UnsupportedCollections.deleting_item_not_supported(
-            message, error_type)(cls)
-        cls = UnsupportedCollections.contains_not_supported(
-            message, error_type)(cls)
-        cls = UnsupportedCollections.reversing_not_supported(
-            message, error_type)(cls)
-        cls = UnsupportedCollections.next_item_not_supported(
-            message, error_type)(cls)
-        cls = UnsupportedCollections.missing_item_not_supported(
-            message, error_type)(cls)
-        cls = UnsupportedCollections.length_hinting_not_supported(
-            message, error_type)(cls)
-        return cls
-
-    return decorator
+        return decorator
